@@ -63,23 +63,39 @@ public class RecordActivity extends Activity implements View.OnClickListener {
     public void onClick(View v){
         switch (v.getId()){
             case R.id.iv_back:
-                if (temp_text!=content_et.getText().toString()){
+                String noteContent = content_et.getText().toString();
+                if (temp_text.equals(noteContent)==false){
                     AlertDialog dialog;
                     AlertDialog.Builder builder = new AlertDialog.Builder(RecordActivity.this).setMessage("保存修改？")
                             .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    if (content_et.getText().toString().length()>0){
-                                        if (mSQLiteHelper.updateData(id, content_et.getText().toString(), DBUtils.getTime())){
-                                            showToast("保存成功");
-                                            setResult(2);
-                                            dialog.dismiss();
-                                            finish();
+                                    if (id!=null){   //  修改记录
+                                        if (noteContent.length()>0){
+                                            if (mSQLiteHelper.updateData(id, noteContent, DBUtils.getTime())){
+                                                showToast("保存成功");
+                                                setResult(2);
+                                                dialog.dismiss();
+                                                finish();
+                                            } else {
+                                                showToast("保存失败");
+                                            }
                                         } else {
-                                            showToast("保存失败");
+                                            showToast("修改内容不能为空！");
                                         }
-                                    } else {
-                                        showToast("修改内容不能为空！");
+                                    } else {   // 新增记录
+                                        if (noteContent.length()>0){
+                                            if (mSQLiteHelper.insertData(noteContent, DBUtils.getTime())){
+                                                showToast("保存成功");
+                                                setResult(2);
+                                                dialog.dismiss();
+                                                finish();
+                                            } else {
+                                                showToast("保存失败");
+                                            }
+                                        } else {
+                                            showToast("修改内容不能为空！");
+                                        }
                                     }
                                 }
 
@@ -92,6 +108,8 @@ public class RecordActivity extends Activity implements View.OnClickListener {
                             });
                     dialog = builder.create();
                     dialog.show();
+                }else{
+                    finish();
                 }
 
                 break;
@@ -99,7 +117,7 @@ public class RecordActivity extends Activity implements View.OnClickListener {
                 content_et.setText("");
                 break;
             case R.id.iv_save:
-                String noteContent = content_et.getText().toString().trim();
+                noteContent = content_et.getText().toString().trim();
                 if (id!=null){   //  修改记录
                     if (noteContent.length()>0){
                         if (mSQLiteHelper.updateData(id, noteContent, DBUtils.getTime())){
